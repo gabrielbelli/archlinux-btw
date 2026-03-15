@@ -576,10 +576,13 @@ ip link show wlan0
 ## Post-Install: paru (AUR Helper)
 
 ```bash
-pacman -S git base-devel
+doas pacman -S git base-devel
 git clone https://aur.archlinux.org/paru.git
+doas chown -R $(whoami):$(whoami) paru
 cd paru
 makepkg -si
+cd ..
+rm -rf paru
 ```
 
 ---
