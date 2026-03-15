@@ -257,7 +257,7 @@ echo "myhostname" > /etc/hostname
 ### Create user
 
 ```bash
-useradd -mG wheel,kvm,libvirt,audio,video,storage,optical,network -s /bin/zsh <username>
+useradd -mG wheel,kvm,audio,video,storage,optical,network -s /bin/zsh <username>
 passwd <username>
 ```
 
@@ -354,7 +354,13 @@ cryptsetup luksAddKey /dev/sda2 /etc/cryptsetup-keys.d/cryptboot.key
 ### /etc/crypttab
 
 ```
-cryptboot  /dev/sda2  /etc/cryptsetup-keys.d/cryptboot.key  luks
+cryptboot  UUID=<UUID-of-sda2>  /etc/cryptsetup-keys.d/cryptboot.key  luks
+```
+
+Get the UUID of `/dev/sda2`:
+
+```bash
+blkid -s UUID -o value /dev/sda2
 ```
 
 > The keyfile lives on the LUKS2-encrypted root, so it's only accessible after `/` is already unlocked. The `encrypt` hook unlocks root first, then `crypttab` is processed and `/boot` is mounted automatically.
@@ -1401,8 +1407,6 @@ cryptsetup open /dev/sda3 cryptroot
 OPTS="noatime,compress=zstd,space_cache=v2,discard=async"
 
 mount -o subvol=@,$OPTS /dev/mapper/cryptroot /mnt
-
-mkdir -p /mnt/{home,.snapshots,var/log,var/cache/pacman/pkg,tmp,var/lib/libvirt/images,boot,efi}
 
 mount -o subvol=@home,$OPTS      /dev/mapper/cryptroot /mnt/home
 mount -o subvol=@snapshots,$OPTS /dev/mapper/cryptroot /mnt/.snapshots
