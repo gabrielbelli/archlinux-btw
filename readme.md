@@ -276,7 +276,32 @@ Many scripts and tools hardcode `sudo`. Add an alias to `~/.zshrc` post-install 
 alias sudo='doas'
 ```
 
-> This alias is a temporary workaround. After installing `opendoas-sudo` (see [paru section](#post-install-paru-aur-helper)), it provides a proper `sudo` symlink and the alias can be removed.
+> This alias ensures compatibility with scripts and tools that hardcode `sudo`, including `makepkg` and AUR helpers.
+
+### (Optional) Dummy sudo package
+
+Some packages declare `sudo` as a dependency. To satisfy this without installing `sudo`, create a dummy package:
+
+```bash
+mkdir -p /tmp/sudo-dummy && cd /tmp/sudo-dummy
+cat <<'EOF' > PKGBUILD
+pkgname=sudo-dummy
+pkgver=1.0
+pkgrel=1
+pkgdesc="Dummy package to satisfy sudo dependency (using doas)"
+arch=('any')
+provides=('sudo')
+conflicts=('sudo')
+EOF
+makepkg -si
+cd && rm -rf /tmp/sudo-dummy
+```
+
+Optionally, create a symlink so `sudo` resolves to `doas` system-wide (not just in your shell):
+
+```bash
+ln -s /usr/bin/doas /usr/local/bin/sudo
+```
 
 ### Lock root account
 
@@ -605,14 +630,6 @@ Configure paru to use `doas`:
 [bin]
 Sudo = doas
 ```
-
-Then install `opendoas-sudo` to provide a proper `sudo` symlink system-wide:
-
-```bash
-paru -S opendoas-sudo
-```
-
-> This replaces the `alias sudo='doas'` workaround in `~/.zshrc` — you can remove the alias after installing this package.
 
 ---
 
